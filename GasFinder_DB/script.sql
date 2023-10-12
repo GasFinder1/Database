@@ -54,7 +54,7 @@ VALUES
 	("GNV", "R$ / m³");
 
 create table tbl_posto (
-	id_posto int (11) primary key auto_increment,
+	id_posto int primary key auto_increment,
 	cnpj varchar (14),
 	nome_posto varchar (115) not null,
 	endereco varchar (65) not null default "",
@@ -168,7 +168,7 @@ FROM	tbl_localizacao_posto AS tlp,
 			tbl_tipo_combustivel AS tc,	
 			tbl_estado AS e
 WHERE	tlp.fk_id_posto = p.id_posto	
-	AND p.id_posto = ptc.fk_id_posto	
+	AND p.id_posto = prc.fk_id_posto	
 	AND prc.fk_id_tipo_combustivel = tc.id_combustivel	
 	AND p.uf = e.id_estado
 ORDER BY	p.id_posto;
