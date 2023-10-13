@@ -43,8 +43,7 @@ create table tbl_tipo_combustivel (
 	unid_medida varchar (10)
 );
 
-INSERT INTO
-	tbl_tipo_combustivel(nome_combustivel, unid_medida)
+INSERT INTO tbl_tipo_combustivel(nome_combustivel, unid_medida)
 VALUES
 	("Gasolina", "R$ / litro"),
 	("Gasolina Aditivada", "R$ / litro"),
@@ -123,23 +122,23 @@ create table tbl_favoritos (
 -- | ====================== VIEWS ====================== | -- 
 CREATE VIEW dados_posto AS
 SELECT	p.id_posto,	
-				p.cnpj,	
-				p.nome_posto,	
-				p.endereco,	
-				p.cep,	
-				p.municipio,	
-				p.bandeira,	
-				p.numero,	
-				p.bairro,	
-				e.uf,	
-				e.estado,	
-				prc.valor,	
-				tc.nome_combustivel,	
-				tc.unid_medida
-FROM tbl_posto AS p, 
-		 tbl_preco AS prc, 
-		 tbl_tipo_combustivel AS tc, 
-		 tbl_estado AS e
+	p.cnpj,	
+	p.nome_posto,	
+	p.endereco,	
+	p.cep,	
+	p.municipio,	
+	p.bandeira,	
+	p.numero,	
+	p.bairro,	
+	e.uf,	
+	e.estado,	
+	prc.valor,	
+	tc.nome_combustivel,	
+	tc.unid_medida
+FROM 	tbl_posto AS p, 
+	tbl_preco AS prc, 
+	tbl_tipo_combustivel AS tc, 
+	tbl_estado AS e
 WHERE	p.id_posto = prc.fk_id_posto	
 	AND prc.fk_id_tipo_combustivel = tc.id_combustivel	
 	AND p.uf = e.id_estado
@@ -147,26 +146,26 @@ ORDER BY p.id_posto;
 
 CREATE VIEW localizacao_dados_posto AS
 SELECT	tlp.lat,	
-				tlp.lon,	
-				p.id_posto,	
-				p.cnpj,	
-				p.nome_posto,	
-				p.endereco,	
-				p.cep,	
-				p.municipio,	
-				p.bandeira,	
-				p.numero,	
-				p.bairro,	
-				e.uf,	
-				e.estado,	
-				prc.valor,	
-				tc.nome_combustivel,	
-				tc.unid_medida
+	tlp.lon,	
+	p.id_posto,	
+	p.cnpj,	
+	p.nome_posto,	
+	p.endereco,	
+	p.cep,	
+	p.municipio,	
+	p.bandeira,	
+	p.numero,	
+	p.bairro,	
+	e.uf,	
+	e.estado,	
+	prc.valor,	
+	tc.nome_combustivel,	
+	tc.unid_medida
 FROM	tbl_localizacao_posto AS tlp,	
-			tbl_posto AS p,	
-			tbl_preco AS prc,	
-			tbl_tipo_combustivel AS tc,	
-			tbl_estado AS e
+	tbl_posto AS p,	
+	tbl_preco AS prc,	
+	tbl_tipo_combustivel AS tc,	
+	tbl_estado AS e
 WHERE	tlp.fk_id_posto = p.id_posto	
 	AND p.id_posto = prc.fk_id_posto	
 	AND prc.fk_id_tipo_combustivel = tc.id_combustivel	
