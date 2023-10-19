@@ -171,3 +171,25 @@ WHERE	tlp.fk_id_posto = p.id_posto
 	AND prc.fk_id_tipo_combustivel = tc.id_combustivel	
 	AND p.uf = e.id_estado
 ORDER BY	p.id_posto;
+
+DELIMITER $
+CREATE PROCEDURE InserirPostoELocalizacao(IN latitude DECIMAL(10, 6), IN longitude DECIMAL(10, 6), IN id int, OUT msg varchar(100))
+BEGIN
+	DECLARE contador INT;
+    DECLARE novo_posto_id INT;
+    SET contador = 0;
+    SELECT COUNT(*) INTO contador FROM localizacao_posto WHERE lat = latitude AND lon = longitude;
+    IF contador = 0 THEN
+		IF id = 0 THEN
+			INSERT INTO tbl_posto (CNPJ) VALUES (0);
+			SET novo_posto_id = LAST_INSERT_ID();
+			INSERT INTO localizacao_posto (fk_id_posto, lat, lon) VALUES (novo_posto_id, latitude, longitude);
+		ELSE
+			SELECT COUNT(*) INTO contador FROM tbl_posto WHERE id_posto = id;
+            IF contador < 1 THEN
+				INSERT INTO localizacao_posto (fk_id_posto, lat, lon) VALUES (id, latitude, longitude);
+            END IF;
+        END IF;
+    END IF;
+END $
+DELIMITER ;
