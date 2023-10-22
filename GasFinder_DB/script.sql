@@ -7,8 +7,8 @@ create table tbl_estado (
 	uf varchar(2)
 );
 
-INSERT INTO tbl_estado (estado, uf)
-VALUES
+insert into tbl_estado (estado, uf)
+values
 	('Acre', 'AC'),
 	('Alagoas', 'AL'),
 	('Amapá', 'AP'),
@@ -40,11 +40,11 @@ VALUES
 create table tbl_tipo_combustivel (
 	id_combustivel int primary key auto_increment,
 	nome_combustivel varchar(30) not null,
-	unid_medida varchar (10)
+	unid_medida varchar(10)
 );
 
-INSERT INTO tbl_tipo_combustivel(nome_combustivel, unid_medida)
-VALUES
+insert into tbl_tipo_combustivel(nome_combustivel, unid_medida)
+values
 	("Gasolina", "R$ / litro"),
 	("Gasolina Aditivada", "R$ / litro"),
 	("Etanol", "R$ / litro"),
@@ -54,16 +54,16 @@ VALUES
 
 create table tbl_posto (
 	id_posto int primary key auto_increment,
-	cnpj varchar (14),
-	nome_posto varchar (115) not null,
-	endereco varchar (65) not null default "",
-	logradouro varchar (65),
-	cep varchar (8) not null,
-	municipio varchar (45) not null,
-	bandeira varchar (45) not null,
-	numero int (6),
-	bairro varchar (50),
-	complemento varchar (125),
+	cnpj varchar(14),
+	nome_posto varchar(115) not null,
+	endereco varchar(65) not null default "",
+	fantasia varchar(65),
+	cep varchar(8) not null,
+	municipio varchar(45) not null,
+	bandeira varchar(45) not null,
+	numero int,
+	bairro varchar(50),
+	complemento varchar(125),
 	uf int not null,
 	foreign key(uf) references tbl_estado(id_estado)
 );
@@ -71,16 +71,16 @@ create table tbl_posto (
 create table tbl_usuario (
 	id_usuario int primary key auto_increment,
 	nome_usuario varchar(45) not null,
-	email varchar (60) not null unique,
-	senha varchar (20) not null
+	email varchar(60) not null unique,
+	senha varchar(20) not null
 );
 
 create table tbl_preco (
-	fk_id_posto INT NOT NULL,
-	fk_id_tipo_combustivel INT NOT NULL,
+	fk_id_posto int not null,
+	fk_id_combustivel int not null,
 	foreign key(fk_id_posto) references tbl_posto(id_posto),
-	foreign key(fk_id_tipo_combustivel) references tbl_tipo_combustivel(id_combustivel),
-	valor FLOAT not null
+	foreign key(fk_id_combustivel) references tbl_combustivel(id_combustivel),
+	valor float not null
 );
 
 create table tbl_colaborativa (
@@ -95,33 +95,33 @@ create table tbl_colaborativa (
 );
 
 create table tbl_historico_preco (
-	fk_id_posto int primary key auto_increment,
+	fk_id_posto int auto_increment,
 	fk_id_combustivel int not null,
 	ultimo_valor float not null,
 	dt_atualizacao date not null,
-	foreign key (fk_id_posto) references tbl_posto(id_posto),
+	foreign key(fk_id_posto) references tbl_posto(id_posto),
 	foreign key(fk_id_combustivel) references tbl_tipo_combustivel(id_combustivel)
 );
 
-CREATE TABLE tbl_localizacao_posto (
-	id_tlc INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	lat DOUBLE not null,
-	lon DOUBLE not null,
+create table tbl_localizacao_posto (
+	id_tlc INT not null auto_increment primary key,
+	lat double not null,
+	lon double not null,
 	fk_id_posto int,
 	foreign key(fk_id_posto) references tbl_posto(id_posto)
 );
 
 create table tbl_favoritos (
 	id_favorito int primary key auto_increment,
-	FK_id_usuario int,
-	FK_id_posto int(11),
-	foreign key(FK_id_posto) references tbl_posto(id_posto),
+	fk_id_usuario int,
+	fk_id_posto int,
+	foreign key(fk_id_posto) references tbl_posto(id_posto),
 	foreign key(fk_id_usuario) references tbl_usuario(id_usuario)
 );
 
 -- | ====================== VIEWS ====================== | -- 
-CREATE VIEW dados_posto AS
-SELECT	p.id_posto,	
+create view dados_posto as
+select	p.id_posto,	
 	p.cnpj,	
 	p.nome_posto,	
 	p.endereco,	
@@ -135,17 +135,17 @@ SELECT	p.id_posto,
 	prc.valor,	
 	tc.nome_combustivel,	
 	tc.unid_medida
-FROM 	tbl_posto AS p, 
-	tbl_preco AS prc, 
-	tbl_tipo_combustivel AS tc, 
-	tbl_estado AS e
-WHERE	p.id_posto = prc.fk_id_posto	
-	AND prc.fk_id_tipo_combustivel = tc.id_combustivel	
-	AND p.uf = e.id_estado
-ORDER BY p.id_posto;
+from 	tbl_posto as p, 
+	tbl_preco as prc, 
+	tbl_tipo_combustivel as tc, 
+	tbl_estado as e
+where	p.id_posto = prc.fk_id_posto	
+	and prc.fk_id_combustivel = tc.id_combustivel	
+	and p.uf = e.id_estado
+order by p.id_posto;
 
-CREATE VIEW localizacao_dados_posto AS
-SELECT	tlp.lat,	
+create view localizacao_dados_posto as
+select	tlp.lat,	
 	tlp.lon,	
 	p.id_posto,	
 	p.cnpj,	
@@ -161,13 +161,86 @@ SELECT	tlp.lat,
 	prc.valor,	
 	tc.nome_combustivel,	
 	tc.unid_medida
-FROM	tbl_localizacao_posto AS tlp,	
-	tbl_posto AS p,	
-	tbl_preco AS prc,	
-	tbl_tipo_combustivel AS tc,	
-	tbl_estado AS e
-WHERE	tlp.fk_id_posto = p.id_posto	
-	AND p.id_posto = prc.fk_id_posto	
-	AND prc.fk_id_tipo_combustivel = tc.id_combustivel	
-	AND p.uf = e.id_estado
-ORDER BY	p.id_posto;
+from	tbl_localizacao_posto as tlp,	
+	tbl_posto as p,	
+	tbl_preco as prc,	
+	tbl_tipo_combustivel as tc,	
+	tbl_estado as e
+where	tlp.fk_id_posto = p.id_posto	
+	and p.id_posto = prc.fk_id_posto	
+	and prc.fk_id_tipo_combustivel = tc.id_combustivel	
+	and p.uf = e.id_estado
+order by p.id_posto;
+
+
+DELIMITER $
+create procedure prc_verifica_preco (
+	in new_cnpj varchar(14),
+	in tipo_comb int,
+	in valor_novo double(10, 2)
+)
+begin
+	declare new_id_posto int;
+	declare new_id_combustivel int;
+	declare valor_atual double(10, 2);
+    declare contador int;
+	
+	/* 
+		PEGAR DADOS CADASTRADOS E COLOCAR NAS VARIAVEIS DECLARADAS ACIMA
+	*/ 
+	-- obtém o ID da tbl_posto com base no parâmetro 'new_cnpj'
+	select id_posto into new_id_posto from tbl_posto
+	where cnpj = new_cnpj;
+
+	-- obtém o ID da tipo_combusível com base no parâmetro 'tipo_comb'
+	select id_combustivel into new_id_combustivel from tbl_tipo_combustivel
+	where id_combustivel = tipo_comb;
+
+	-- obtém o valor do combusível com base nos parâmetros 'new_id_posto' e 'new_id_combustivel'
+	select valor  into valor_atual from tbl_preco
+	where fk_id_posto = new_id_posto and fk_id_combustivel = new_id_combustivel;
+
+	-- conta quantas linhas há na tbl_preco e insere esse valor na variavel 'contador'
+	select count(*) into contador from tbl_preco
+	where fk_id_posto = new_id_posto and fk_id_combustivel = new_id_combustivel;
+
+	-- se em 	'contador' o valor de linhas for menos que 1, é inserido o valor passado na chamada da procedure  
+	-- se ele for maior ou igual a 1 e valor_atual for diferente do valor_novo, atualiza o valor
+	if contador < 1 then
+			insert into tbl_preco(	fk_id_posto,	fk_id_combustivel,	valor ) 
+			values ( 1, 1, valor_novo );
+	else
+		if valor_atual <> valor_novo then
+			insert into tbl_historico_preco (	fk_id_posto, 	fk_id_combustivel, 	ultimo_valor,	dt_atualizacao ) 
+			values (	new_id_posto,	new_id_combustivel, 	valor_atual,	current_timestamp() );
+	
+			update tbl_preco set valor = valor_novo
+			where fk_id_posto = new_id_posto and fk_id_combustivel = new_id_combustivel;
+		end if;
+	end if ;
+end $
+DELIMITER ;
+
+/* 
+	O seguinte insert na tbl_posto só serve para testar. Se for inserir os postos 
+	com o back-end: exclua este insert da tbl_posto, delete o banco, insira os 
+	postos (back-end) e só depois chame a procedure.
+*/
+insert into tbl_posto ( cnpj, nome_posto, endereco, fantasia, cep, municipio, bandeira, numero, bairro, complemento, uf ) 
+values ( '2086208000109', 'POSTO URSA MENOR LTDA', 'AVENIDA ROTARY', '', '6816100', 'EMBU DAS ARTES', 'VIBRA', '2991', 'PARQUE LUIZA', '', 25 );
+
+/*
+	você pode testar excluir este insert na tbl_preco, 
+	para testar a condição em que não tem nenhuma linha cadastrada 
+	nela e é inserido o valor da chamada da procedure
+*/
+insert into tbl_preco (	fk_id_posto,	fk_id_combustivel,	valor )
+values ( 1, 1, 5.00 );
+
+-- chamada da procedure, passando valores de cnpj, tipo de combustivel, valor_novo
+call prc_verifica_preco('2086208000109', 1, 5.10);
+
+-- consulta para constatação de funcionamento da procedure
+select*from tbl_preco;
+select*from tbl_historico_preco;
+select*from tbl_posto;
