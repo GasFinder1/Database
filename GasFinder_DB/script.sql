@@ -120,12 +120,12 @@ create table tbl_favoritos (
 );
 
 create table tbl_avaliacao (
-		-- serão double, pois para avaliar serão utilizadas as 5 estrelas
-		av_posto double,
-		qualidade_prod double,
+	-- serão double, pois para avaliar serão utilizadas as 5 estrelas
+	av_posto double,
+	qualidade_prod double,
     qualidade_atendimento double,
-		opiniao varchar (500),
-		fk_id_posto int not null,
+	opiniao varchar (500),
+	fk_id_posto int not null,
     fk_id_usuario int not null,
     foreign key(fk_id_posto) references tbl_posto(id_posto),
     foreign key(fk_id_usuario) references tbl_usuario(id_usuario)
@@ -164,7 +164,7 @@ select	p.id_posto,
 	prc.valor,	
 	tc.nome_combustivel,	
 	tc.unid_medida
-from 	tbl_posto as p, 
+from tbl_posto as p, 
 	tbl_preco as prc, 
 	tbl_tipo_combustivel as tc, 
 	tbl_estado as e
@@ -174,7 +174,7 @@ where	p.id_posto = prc.fk_id_posto
 order by p.id_posto;
 
 create view localizacao_dados_posto as
-select	tlp.lat,	
+select tlp.lat,	
 	tlp.lon,	
 	p.id_posto,	
 	p.cnpj,	
@@ -190,12 +190,12 @@ select	tlp.lat,
 	prc.valor,	
 	tc.nome_combustivel,	
 	tc.unid_medida
-from	tbl_localizacao_posto as tlp,	
+from tbl_localizacao_posto as tlp,	
 	tbl_posto as p,	
 	tbl_preco as prc,	
 	tbl_tipo_combustivel as tc,	
 	tbl_estado as e
-where	tlp.fk_id_posto = p.id_posto	
+where tlp.fk_id_posto = p.id_posto	
 	and p.id_posto = prc.fk_id_posto	
 	and prc.fk_id_combustivel = tc.id_combustivel	
 	and p.uf = e.id_estado
