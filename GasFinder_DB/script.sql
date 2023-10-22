@@ -79,7 +79,7 @@ create table tbl_preco (
 	fk_id_posto int not null,
 	fk_id_combustivel int not null,
 	foreign key(fk_id_posto) references tbl_posto(id_posto),
-	foreign key(fk_id_combustivel) references tbl_combustivel(id_combustivel),
+	foreign key(fk_id_combustivel) references tbl_tipo_combustivel(id_combustivel),
 	valor float not null
 );
 
@@ -117,6 +117,35 @@ create table tbl_favoritos (
 	fk_id_posto int,
 	foreign key(fk_id_posto) references tbl_posto(id_posto),
 	foreign key(fk_id_usuario) references tbl_usuario(id_usuario)
+);
+
+create table tbl_avaliacao (
+		-- serão double, pois para avaliar serão utilizadas as 5 estrelas
+		av_posto double,
+		qualidade_prod double,
+    qualidade_atendimento double,
+		opiniao varchar (500),
+		fk_id_posto int not null,
+    fk_id_usuario int not null,
+    foreign key(fk_id_posto) references tbl_posto(id_posto),
+    foreign key(fk_id_usuario) references tbl_usuario(id_usuario)
+); 
+
+-- parceiro irá inserir essas informações no seu cadastro
+create table tbl_parceiros (     
+	id_parceiro int primary key auto_increment not null,
+	cnpj varchar(14) not null,
+    nome_parceiro varchar(50) not null,
+    ramo varchar(40) not null, -- para poder fazer busca por "mecanica", "borracharia", "auto-eletricas"
+    endereco varchar (65) not null default "",
+	fantasia varchar (65),
+    cep varchar (8) not null,
+	municipio varchar (45) not null,
+	numero int,
+	bairro varchar (50),
+	complemento  varchar (125),
+    uf int not null,
+    foreign key(uf) references tbl_estado(id_estado)
 );
 
 -- | ====================== VIEWS ====================== | -- 
@@ -168,7 +197,7 @@ from	tbl_localizacao_posto as tlp,
 	tbl_estado as e
 where	tlp.fk_id_posto = p.id_posto	
 	and p.id_posto = prc.fk_id_posto	
-	and prc.fk_id_tipo_combustivel = tc.id_combustivel	
+	and prc.fk_id_combustivel = tc.id_combustivel	
 	and p.uf = e.id_estado
 order by p.id_posto;
 
@@ -208,7 +237,7 @@ begin
 	-- se ele for maior ou igual a 1 e valor_atual for diferente do valor_novo, atualiza o valor
 	if contador < 1 then
 			insert into tbl_preco(	fk_id_posto,	fk_id_combustivel,	valor ) 
-			values ( 1, 1, valor_novo );
+			values ( new_id_posto, new_id_combustivel, valor_novo );
 	else
 		if valor_atual <> valor_novo then
 			insert into tbl_historico_preco (	fk_id_posto, 	fk_id_combustivel, 	ultimo_valor,	dt_atualizacao ) 
@@ -230,7 +259,7 @@ insert into tbl_posto ( cnpj, nome_posto, endereco, fantasia, cep, municipio, ba
 values ( '2086208000109', 'POSTO URSA MENOR LTDA', 'AVENIDA ROTARY', '', '6816100', 'EMBU DAS ARTES', 'VIBRA', '2991', 'PARQUE LUIZA', '', 25 );
 
 /*
-	você pode testar excluir este insert na tbl_preco, 
+	você pode testar excluir este insert na tbl_preco seguindo a mesma recomendação acima, 
 	para testar a condição em que não tem nenhuma linha cadastrada 
 	nela e é inserido o valor da chamada da procedure
 */
@@ -238,9 +267,11 @@ insert into tbl_preco (	fk_id_posto,	fk_id_combustivel,	valor )
 values ( 1, 1, 5.00 );
 
 -- chamada da procedure, passando valores de cnpj, tipo de combustivel, valor_novo
-call prc_verifica_preco('2086208000109', 1, 5.10);
+call prc_verifica_preco('02086208000109', 5, 5.99);
 
 -- consulta para constatação de funcionamento da procedure
 select*from tbl_preco;
+select*from tbl_tipo_combustivel;
 select*from tbl_historico_preco;
+select*from tbl_posto where municipio='EMBU DAS ARTES';
 select*from tbl_posto;
