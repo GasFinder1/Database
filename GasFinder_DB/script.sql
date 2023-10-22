@@ -119,6 +119,35 @@ create table tbl_favoritos (
 	foreign key(fk_id_usuario) references tbl_usuario(id_usuario)
 );
 
+create table tbl_avaliacao (
+		-- serão double, pois para avaliar serão utilizadas as 5 estrelas
+		av_posto double,
+		qualidade_prod double,
+    qualidade_atendimento double,
+		opiniao varchar (500),
+		fk_id_posto int not null,
+    fk_id_usuario int not null,
+    foreign key(fk_id_posto) references tbl_posto(id_posto),
+    foreign key(fk_id_usuario) references tbl_usuario(id_usuario)
+); 
+
+-- parceiro irá inserir essas informações no seu cadastro
+create table tbl_parceiros (     
+		id_parceiro int primary key auto_increment not null,
+		cnpj varchar(14) not null,
+    nome_parceiro varchar(50) not null,
+    ramo varchar(40) not null, -- para poder fazer busca por "mecanica", "borracharia", "auto-eletricas"
+    endereco varchar (65) not null default "",
+		fantasia varchar (65),
+    cep varchar (8) not null,
+		municipio varchar (45) not null,
+		numero int,
+		bairro varchar (50),
+		complemento  varchar (125),
+    uf int not null,
+    foreign key(uf) references tbl_estado(id_estado)
+);
+
 -- | ====================== VIEWS ====================== | -- 
 create view dados_posto as
 select	p.id_posto,	
