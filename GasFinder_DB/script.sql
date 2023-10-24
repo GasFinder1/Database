@@ -123,23 +123,23 @@ create table tbl_avaliacao (
 	-- serão double, pois para avaliar serão utilizadas as 5 estrelas
 	av_posto double,
 	qualidade_prod double,
-    qualidade_atendimento double,
+    	qualidade_atendimento double,
 	opiniao varchar (500),
 	fk_id_posto int not null,
-    fk_id_usuario int not null,
-    foreign key(fk_id_posto) references tbl_posto(id_posto),
-    foreign key(fk_id_usuario) references tbl_usuario(id_usuario)
+    	fk_id_usuario int not null,
+    	foreign key(fk_id_posto) references tbl_posto(id_posto),
+    	foreign key(fk_id_usuario) references tbl_usuario(id_usuario)
 ); 
 
 -- parceiro irá inserir essas informações no seu cadastro
 create table tbl_parceiros (     
 	id_parceiro int primary key auto_increment not null,
 	cnpj varchar(14) not null,
-    nome_parceiro varchar(50) not null,
-    ramo varchar(40) not null, -- para poder fazer busca por "mecanica", "borracharia", "auto-eletricas"
-    endereco varchar (65) not null default "",
+    	nome_parceiro varchar(50) not null,
+    	ramo varchar(40) not null, -- para poder fazer busca por "mecanica", "borracharia", "auto-eletricas"
+    	endereco varchar (65) not null default "",
 	fantasia varchar (65),
-    cep varchar (8) not null,
+    	cep varchar (8) not null,
 	municipio varchar (45) not null,
 	numero int,
 	bairro varchar (50),
@@ -249,22 +249,6 @@ begin
 	end if ;
 end $
 DELIMITER ;
-
-/* 
-	O seguinte insert na tbl_posto só serve para testar. Se for inserir os postos 
-	com o back-end: exclua este insert da tbl_posto, delete o banco, insira os 
-	postos (back-end) e só depois chame a procedure.
-*/
-insert into tbl_posto ( cnpj, nome_posto, endereco, fantasia, cep, municipio, bandeira, numero, bairro, complemento, uf ) 
-values ( '2086208000109', 'POSTO URSA MENOR LTDA', 'AVENIDA ROTARY', '', '6816100', 'EMBU DAS ARTES', 'VIBRA', '2991', 'PARQUE LUIZA', '', 25 );
-
-/*
-	você pode testar excluir este insert na tbl_preco seguindo a mesma recomendação acima, 
-	para testar a condição em que não tem nenhuma linha cadastrada 
-	nela e é inserido o valor da chamada da procedure
-*/
-insert into tbl_preco (	fk_id_posto,	fk_id_combustivel,	valor )
-values ( 1, 1, 5.00 );
 
 -- chamada da procedure, passando valores de cnpj, tipo de combustivel, valor_novo
 call prc_verifica_preco('02086208000109', 5, 5.99);
