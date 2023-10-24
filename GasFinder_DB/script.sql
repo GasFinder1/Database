@@ -95,7 +95,7 @@ create table tbl_colaborativa (
 );
 
 create table tbl_historico_preco (
-	fk_id_posto int primary key auto_increment,
+	fk_id_posto int not null,
 	fk_id_combustivel int not null,
 	ultimo_valor float not null,
 	dt_atualizacao date not null,
@@ -103,12 +103,16 @@ create table tbl_historico_preco (
 	foreign key(fk_id_combustivel) references tbl_tipo_combustivel(id_combustivel)
 );
 
-CREATE TABLE tbl_localizacao_posto (
-	id_tlc INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	lat DOUBLE not null,
-	lon DOUBLE not null,
-	fk_id_posto int,
-	foreign key(fk_id_posto) references tbl_posto(id_posto)
+create table tbl_localizacao_posto (
+    id_tlc INT not null auto_increment primary key,
+    lat double not null,
+    lon double not null,
+    media_ava_atendimento double,
+    media_ava_posto double,
+    media_ava_produto double,
+    fk_id_posto int,
+    foreign key(fk_id_posto) references tbl_posto(id_posto),
+	unique key unique_lat_lon (lat, lon)
 );
 
 create table tbl_favoritos (
@@ -117,6 +121,26 @@ create table tbl_favoritos (
 	FK_id_posto int(11),
 	foreign key(FK_id_posto) references tbl_posto(id_posto),
 	foreign key(fk_id_usuario) references tbl_usuario(id_usuario)
+);
+
+create table tbl_avaliacao (
+    av_posto int,
+    qualidade_prod int,
+    qualidade_atendimento int,
+    dt_ava date not null,
+    fk_id_tlc int not null,
+    fk_id_usuario int not null,
+    foreign key(fk_id_tlc) references tbl_localizacao_posto(id_tlc),
+    foreign key(fk_id_usuario) references tbl_usuario(id_usuario)
+); 
+
+create table tbl_comentario (
+    comentario varchar(500),
+    dt_comentario date,
+    fk_id_tlc int not null,
+    fk_id_usuario int not null,
+    foreign key(fk_id_tlc) references tbl_localizacao_posto(id_tlc),
+    foreign key(fk_id_usuario) references tbl_usuario(id_usuario)
 );
 
 -- | ====================== VIEWS ====================== | -- 
@@ -172,24 +196,120 @@ WHERE	tlp.fk_id_posto = p.id_posto
 	AND p.uf = e.id_estado
 ORDER BY	p.id_posto;
 
+-- | ====================== PROCEDURES ====================== | -- 
+
 DELIMITER $
-CREATE PROCEDURE InserirPostoELocalizacao(IN latitude DECIMAL(10, 6), IN longitude DECIMAL(10, 6), IN id int, OUT msg varchar(100))
+CREATE PROCEDURE InserirPostoELocalizacao(
+	IN latitude DECIMAL(10, 6), 
+	IN longitude DECIMAL(10, 6), 
+	IN id int, 
+	OUT msg varchar(100)
+)
 BEGIN
 	DECLARE contador INT;
     DECLARE novo_posto_id INT;
     SET contador = 0;
-    SELECT COUNT(*) INTO contador FROM localizacao_posto WHERE lat = latitude AND lon = longitude;
+    SELECT COUNT(*) INTO contador FROM tbl_localizacao_posto WHERE lat = latitude AND lon = longitude;
     IF contador = 0 THEN
 		IF id = 0 THEN
 			INSERT INTO tbl_posto (CNPJ) VALUES (0);
 			SET novo_posto_id = LAST_INSERT_ID();
-			INSERT INTO localizacao_posto (fk_id_posto, lat, lon) VALUES (novo_posto_id, latitude, longitude);
+			INSERT INTO tbl_localizacao_posto (fk_id_posto, lat, lon) VALUES (novo_posto_id, latitude, longitude);
 		ELSE
+			SET msg = "essa mensagem não deveria aparecer!";
 			SELECT COUNT(*) INTO contador FROM tbl_posto WHERE id_posto = id;
-            IF contador < 1 THEN
-				INSERT INTO localizacao_posto (fk_id_posto, lat, lon) VALUES (id, latitude, longitude);
+            IF contador >= 1 THEN
+				INSERT INTO tbl_localizacao_posto (fk_id_posto, lat, lon) VALUES (id, latitude, longitude);
+                SET msg = "tudo ocorreu certo";
+			ELSE
+				SET msg = "o posto não existe";
             END IF;
+		END IF;
+	ELSE
+		SET msg = "posto já cadastrado!";
+    END IF;
+END $
+DELIMITER ;
+
+DELIMITER $
+CREATE PROCEDURE pr_avaliacao(
+	IN usuario INT,
+	IN posto INT,
+	IN avaliacao_posto INT,
+	IN avaliacao_produto INT,
+	IN avaliacao_atendimento INT,
+	IN opiniao_usuario VARCHAR(500),
+	OUT msg VARCHAR(100)
+)
+BEGIN
+	DECLARE m_pos DOUBLE;
+	DECLARE m_pro DOUBLE;
+	DECLARE m_ate DOUBLE;
+	SET m_pos = 0;
+	SET m_pro = 0;
+	SET m_ate = 0;
+    IF avaliacao_posto >= 0 AND avaliacao_posto <= 5 
+    AND avaliacao_produto >= 0 AND avaliacao_produto <= 5 
+    AND avaliacao_atendimento >= 0 AND avaliacao_atendimento <= 5 THEN
+        IF EXISTS (SELECT 1 FROM tbl_usuario WHERE id_usuario = usuario) THEN
+            IF EXISTS (SELECT 1 FROM tbl_localizacao_posto WHERE id_tlc = posto) THEN
+                IF EXISTS (SELECT 1 FROM tbl_avaliacao WHERE fk_id_tlc = posto AND fk_id_usuario = usuario AND (av_posto <> avaliacao_posto OR qualidade_prod <> avaliacao_produto OR qualidade_atendimento <> avaliacao_atendimento)) THEN
+					UPDATE tbl_avaliacao
+					SET av_posto = avaliacao_posto, 
+					qualidade_prod = avaliacao_produto,
+					qualidade_atendimento = avaliacao_atendimento,
+					dt_ava = CURDATE()
+					WHERE fk_id_tlc = posto AND fk_id_usuario = usuario;
+					IF (SELECT ROW_COUNT()) = 0 THEN
+						SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Erro ao atualizar os dados de avaliação';
+					END IF;
+					SET msg = "avaliação atualizada";
+                ELSE
+                    INSERT INTO tbl_avaliacao(av_posto, qualidade_prod, qualidade_atendimento, dt_ava, fk_id_tlc, fk_id_usuario)
+                    VALUES (avaliacao_posto, avaliacao_produto, avaliacao_atendimento, CURDATE(), posto, usuario);
+					IF (SELECT ROW_COUNT()) = 0 THEN
+						SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Erro ao inserir os dados de avaliação';
+					END IF;
+					SET msg = "avaliação inserida";
+                END IF;
+				SELECT AVG(COALESCE(qualidade_prod, -1)) AS m_pro,
+						AVG(COALESCE(qualidade_atendimento, -1)) AS m_ate,
+						AVG(COALESCE(av_posto, -1)) AS m_pos
+					INTO m_pro, m_ate, m_pos
+					FROM tbl_avaliacao;
+				UPDATE tbl_localizacao_posto
+					SET media_ava_atendimento = m_ate,
+					media_ava_posto = m_pos,
+					media_ava_produto = m_pro
+				WHERE id_tlc = posto;
+				
+                IF opiniao_usuario IS NOT NULL AND opiniao_usuario != "" THEN
+                    IF EXISTS (SELECT 1 FROM tbl_comentario WHERE fk_id_tlc = posto AND fk_id_usuario = usuario AND comentario <> opiniao_usuario) THEN
+                        UPDATE tbl_comentario
+                        SET comentario = opiniao_usuario, 
+                        dt_comentario = CURDATE()
+                        WHERE fk_id_tlc = posto AND fk_id_usuario = usuario;
+						IF (SELECT ROW_COUNT()) = 0 THEN
+							SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Erro ao atualizar o comentario';
+						END IF;
+                    ELSE
+                        INSERT INTO tbl_comentario(comentario, dt_comentario, fk_id_tlc, fk_id_usuario)
+                        VALUES (opiniao_usuario, CURDATE(), posto, usuario);
+						IF (SELECT ROW_COUNT()) = 0 THEN
+							SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Erro ao inserir o comentario';
+						END IF;
+                    END IF;
+                END IF;
+            ELSE
+                SET msg = "posto inexistente";
+                SIGNAL SQLSTATE '23000' SET MESSAGE_TEXT = 'Erro ao inserir na tabela de avaliação, posto inexistente';
+            END IF;
+        ELSE
+            SET msg = "usuario inexistente";
+            SIGNAL SQLSTATE '23000' SET MESSAGE_TEXT = 'Erro ao inserir na tabela de avaliação, usuario inexistente';
         END IF;
+    ELSE
+        SET msg = "valores de avaliacao fora do escopo";
     END IF;
 END $
 DELIMITER ;
