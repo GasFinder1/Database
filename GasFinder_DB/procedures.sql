@@ -9,6 +9,7 @@ begin
 	declare new_id_combustivel int;
 	declare valor_atual double(10, 2);
 	declare contador int;
+
 	select id_posto into new_id_posto from tbl_posto
 	where cnpj = new_cnpj;
 	select id_combustivel into new_id_combustivel from tbl_tipo_combustivel
@@ -33,7 +34,7 @@ DELIMITER ;
 
 DELIMITER $
 create procedure InserirPostoELocalizacao(
-	in placeID
+	in placeID varchar(150)
 	in idPosto int, 
 	out msg varchar(100)
 )
@@ -66,7 +67,7 @@ DELIMITER ;
 DELIMITER $
 create procedure pr_avaliacao(
 	in usuario int,
-	in posto int,
+	in posto varchar(150),
 	in avaliacao_posto int,
 	in avaliacao_produto int,
 	in avaliacao_atendimento int,

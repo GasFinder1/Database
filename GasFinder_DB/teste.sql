@@ -3,8 +3,8 @@ select * from dados_posto where id_posto = 1;
 
 -- procedure: insere posto pelas coordenadas
 -- call InserirPostoELocalizacao(place_ID, id_posto(0 para "criar um posto"), saida_texto);
-call InserirPostoELocalizacao(5467897654897, 2, @msg);
-call InserirPostoELocalizacao(4567865435678, 0, @msg);
+call InserirPostoELocalizacao("ChIJ4TOHb2mrz5QRqMCRPyacgwk", 2, @msg);
+call InserirPostoELocalizacao("ChIJ4TOHb2mrz5QRqMCRPyacgwk", 0, @msg);
 select * from tbl_localizacao_posto;
 select * from localizacao_dados_posto;
 
