@@ -46,7 +46,6 @@ begin
 			set novo_posto_id = LAST_INSERT_ID();
 			insert into tbl_localizacao_posto (fk_id_posto, place_ID) values (novo_posto_id, placeID);
 		else
-			set msg = "essa mensagem não deveria aparecer!";
 			if exists (select 1 from tbl_posto where id_posto = idPosto) then
 				insert into tbl_localizacao_posto (fk_id_posto, place_ID) values (idPosto, placeID);
 				if (select ROW_COUNT()) = 0 then
