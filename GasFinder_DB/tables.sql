@@ -70,7 +70,7 @@ create table if not exists tbl_localizacao_posto (
 	media_ava_posto double,
 	media_ava_produto double,
 	fk_id_posto int,
-	foreign key(fk_id_posto) references tbl_posto(id_posto),
+	foreign key(fk_id_posto) references tbl_posto(id_posto)
 );
 
 create table if not exists tbl_favoritos (

@@ -34,7 +34,7 @@ DELIMITER ;
 
 DELIMITER $
 create procedure InserirPostoELocalizacao(
-	in placeID varchar(150)
+	in placeID varchar(150),
 	in idPosto int, 
 	out msg varchar(100)
 )

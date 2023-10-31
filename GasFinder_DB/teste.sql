@@ -1,10 +1,14 @@
 select * from tbl_posto;
 select * from dados_posto where id_posto = 1;
 
+insert into tbl_posto(cnpj) values(0);
+
 -- procedure: insere posto pelas coordenadas
 -- call InserirPostoELocalizacao(place_ID, id_posto(0 para "criar um posto"), saida_texto);
-call InserirPostoELocalizacao("ChIJ4TOHb2mrz5QRqMCRPyacgwk", 2, @msg);
+call InserirPostoELocalizacao("ChIJ4TOHb2mrz5QRqMCRPyacgwk", 100, @msg);
+select @msg;
 call InserirPostoELocalizacao("ChIJ4TOHb2mrz5QRqMCRPyacgwk", 0, @msg);
+select @msg;
 select * from tbl_localizacao_posto;
 select * from localizacao_dados_posto;
 
@@ -25,3 +29,6 @@ select * from tbl_historico_preco;
 select * from tbl_tipo_combustivel;
 
 select * from tbl_usuario;
+select * from tbl_localizacao_posto where place_ID = "ChIJ4TOHb2mrz5QRqMCRPyacgwk";
+select * from localizacao_dados_posto;
+SELECT * FROM localizacao_dados_posto WHERE place_ID = "ChIJ4TOHb2mrz5QRqMCRPyacgwk";
