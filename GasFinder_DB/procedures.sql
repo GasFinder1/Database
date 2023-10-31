@@ -33,22 +33,21 @@ DELIMITER ;
 
 DELIMITER $
 create procedure InserirPostoELocalizacao(
-	in latitude decimal(10, 6), 
-	in longitude decimal(10, 6), 
+	in placeID
 	in idPosto int, 
 	out msg varchar(100)
 )
 begin
 	declare novo_posto_id int;
-	if not exists (select 1 from tbl_localizacao_posto where lat = latitude and lon = longitude) then
+	if not exists (select 1 from tbl_localizacao_posto where place_ID = placeID) then
 		if idPosto = 0 then
 			insert into tbl_posto (CNPJ) values (0);
 			set novo_posto_id = LAST_INSERT_ID();
-			insert into tbl_localizacao_posto (fk_id_posto, lat, lon) values (novo_posto_id, latitude, longitude);
+			insert into tbl_localizacao_posto (fk_id_posto, place_ID) values (novo_posto_id, placeID);
 		else
 			set msg = "essa mensagem não deveria aparecer!";
 			if exists (select 1 from tbl_posto where id_posto = idPosto) then
-				insert into tbl_localizacao_posto (fk_id_posto, lat, lon) values (idPosto, latitude, longitude);
+				insert into tbl_localizacao_posto (fk_id_posto, place_ID) values (idPosto, placeID);
 				if (select ROW_COUNT()) = 0 then
 					SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Não foi possível inserir os dados';
 				end if;

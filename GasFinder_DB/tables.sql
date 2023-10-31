@@ -66,14 +66,11 @@ create table if not exists tbl_historico_preco (
 
 create table if not exists tbl_localizacao_posto (
 	place_ID int not null auto_increment primary key,
-	lat double not null,
-	lon double not null,
 	media_ava_atendimento double,
 	media_ava_posto double,
 	media_ava_produto double,
 	fk_id_posto int,
 	foreign key(fk_id_posto) references tbl_posto(id_posto),
-	unique key unique_lat_lon (lat, lon)
 );
 
 create table if not exists tbl_favoritos (

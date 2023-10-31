@@ -23,8 +23,7 @@ where p.id_posto = prc.fk_id_posto
 order by p.id_posto;
 
 create view localizacao_dados_posto as
-select tlp.lat,	
-	tlp.lon,	
+select tlp.place_ID,	
 	p.id_posto,	
 	p.cnpj,	
 	p.nome_posto,	
