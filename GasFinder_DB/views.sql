@@ -1,4 +1,4 @@
-create view dados_posto as
+create view if not exists dados_posto as
 select p.id_posto,	
 	p.cnpj,	
 	p.nome_posto,	
@@ -22,7 +22,7 @@ where p.id_posto = prc.fk_id_posto
 	and p.uf = e.id_estado
 order by p.id_posto;
 
-create view localizacao_dados_posto as
+create view if not exists localizacao_dados_posto as
 select tlp.place_ID,	
 	p.id_posto,	
 	p.cnpj,	
