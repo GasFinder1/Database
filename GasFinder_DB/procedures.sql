@@ -9,6 +9,7 @@ begin
 	declare new_id_combustivel int;
 	declare valor_atual double(10, 2);
 	declare contador int;
+
 	select id_posto into new_id_posto from tbl_posto
 	where cnpj = new_cnpj;
 	select id_combustivel into new_id_combustivel from tbl_tipo_combustivel
@@ -33,22 +34,20 @@ DELIMITER ;
 
 DELIMITER $
 create procedure InserirPostoELocalizacao(
-	in latitude decimal(10, 6), 
-	in longitude decimal(10, 6), 
+	in placeID varchar(150),
 	in idPosto int, 
 	out msg varchar(100)
 )
 begin
 	declare novo_posto_id int;
-	if not exists (select 1 from tbl_localizacao_posto where lat = latitude and lon = longitude) then
+	if not exists (select 1 from tbl_localizacao_posto where place_ID = placeID) then
 		if idPosto = 0 then
 			insert into tbl_posto (CNPJ) values (0);
 			set novo_posto_id = LAST_INSERT_ID();
-			insert into tbl_localizacao_posto (fk_id_posto, lat, lon) values (novo_posto_id, latitude, longitude);
+			insert into tbl_localizacao_posto (fk_id_posto, place_ID) values (novo_posto_id, placeID);
 		else
-			set msg = "essa mensagem não deveria aparecer!";
 			if exists (select 1 from tbl_posto where id_posto = idPosto) then
-				insert into tbl_localizacao_posto (fk_id_posto, lat, lon) values (idPosto, latitude, longitude);
+				insert into tbl_localizacao_posto (fk_id_posto, place_ID) values (idPosto, placeID);
 				if (select ROW_COUNT()) = 0 then
 					SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Não foi possível inserir os dados';
 				end if;
@@ -67,7 +66,7 @@ DELIMITER ;
 DELIMITER $
 create procedure pr_avaliacao(
 	in usuario int,
-	in posto int,
+	in posto varchar(150),
 	in avaliacao_posto int,
 	in avaliacao_produto int,
 	in avaliacao_atendimento int,
@@ -85,20 +84,20 @@ begin
 	and avaliacao_produto >= 0 and avaliacao_produto <= 5 
 	and avaliacao_atendimento >= 0 and avaliacao_atendimento <= 5 then
 		if exists (select 1 from tbl_usuario where id_usuario = usuario) then
-			if exists (select 1 from tbl_localizacao_posto where id_tlc = posto) then
-				if exists (select 1 from tbl_avaliacao where fk_id_tlc = posto and fk_id_usuario = usuario and (av_posto <> avaliacao_posto OR qualidade_prod <> avaliacao_produto OR qualidade_atendimento <> avaliacao_atendimento)) then
+			if exists (select 1 from tbl_localizacao_posto where place_ID = posto) then
+				if exists (select 1 from tbl_avaliacao where fk_place_ID = posto and fk_id_usuario = usuario and (av_posto <> avaliacao_posto OR qualidade_prod <> avaliacao_produto OR qualidade_atendimento <> avaliacao_atendimento)) then
 					UPDATE tbl_avaliacao
 					set av_posto = avaliacao_posto, 
 					qualidade_prod = avaliacao_produto,
 					qualidade_atendimento = avaliacao_atendimento,
 					dt_ava = CURDATE()
-					where fk_id_tlc = posto and fk_id_usuario = usuario;
+					where fk_place_ID = posto and fk_id_usuario = usuario;
 					if (select ROW_COUNT()) = 0 then
 						SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Erro ao atualizar os dados de avaliação';
 					end if;
 					set msg = "avaliação atualizada";
 				else
-					insert into tbl_avaliacao(av_posto, qualidade_prod, qualidade_atendimento, dt_ava, fk_id_tlc, fk_id_usuario)
+					insert into tbl_avaliacao(av_posto, qualidade_prod, qualidade_atendimento, dt_ava, fk_place_ID, fk_id_usuario)
 					values (avaliacao_posto, avaliacao_produto, avaliacao_atendimento, CURDATE(), posto, usuario);
 					if (select ROW_COUNT()) = 0 then
 						SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Erro ao inserir os dados de avaliação';
@@ -114,19 +113,19 @@ begin
 					set media_ava_atendimento = m_ate,
 					media_ava_posto = m_pos,
 					media_ava_produto = m_pro
-				where id_tlc = posto;
+				where place_ID = posto;
 				
 				if opiniao_usuario IS NOT NULL and opiniao_usuario != "" then
-					if exists (select 1 from tbl_comentario where fk_id_tlc = posto and fk_id_usuario = usuario and comentario <> opiniao_usuario) then
+					if exists (select 1 from tbl_comentario where fk_place_ID = posto and fk_id_usuario = usuario and comentario <> opiniao_usuario) then
 						UPDATE tbl_comentario
 						set comentario = opiniao_usuario, 
 						dt_comentario = CURDATE()
-						where fk_id_tlc = posto and fk_id_usuario = usuario;
+						where fk_place_ID = posto and fk_id_usuario = usuario;
 						if (select ROW_COUNT()) = 0 then
 							SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Erro ao atualizar o comentario';
 						end if;
 					else
-						insert into tbl_comentario(comentario, dt_comentario, fk_id_tlc, fk_id_usuario)
+						insert into tbl_comentario(comentario, dt_comentario, fk_place_ID, fk_id_usuario)
 						values (opiniao_usuario, CURDATE(), posto, usuario);
 						if (select ROW_COUNT()) = 0 then
 							SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Erro ao inserir o comentario';
@@ -143,6 +142,24 @@ begin
 		end if;
 	else
 		set msg = "valores de avaliacao fora do escopo";
+	end if;
+end $
+DELIMITER ;
+
+DELIMITER $
+create procedure user_insert(
+in user_name varchar(100),
+in user_email varchar(60),
+in user_password varchar(20)
+)
+begin
+	if exists (select 1 from tbl_usuario where email = user_email) then
+		SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'existe outro usuário cadastrado com esse email';
+	else
+		insert into tbl_usuario(nome_usuario, email, senha) values(user_name, user_email, user_password);
+        if (select ROW_COUNT()) = 0 then
+			SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Não foi possível inserir os dados';
+        end if;
 	end if;
 end $
 DELIMITER ;
