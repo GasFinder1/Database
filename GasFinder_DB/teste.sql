@@ -19,8 +19,11 @@ insert into tbl_usuario(nome_usuario, email, senha) values("teste2", "teste2@gma
 -- call pr_avaliacao(fk_id_usuario, fk_place_ID, av_posto(0-5), av_produto(0-5), av_atendimento(0-5), opinião_texto, saida_texto);
 call pr_avaliacao(1, "ChIJ4TOHb2mrz5QRqMCRPyacgwk", 5, 5, 5, "", @msg);
 call pr_avaliacao(2, "ChIJ4TOHb2mrz5QRqMCRPyacgwk", 5, 5, 5, "gostei do posto", @msg);
+call getEvaluation("ChIJ4TOHb2mrz5QRqMCRPyacgwk", 1);
 select * from tbl_avaliacao;
 select * from tbl_comentario;
+
+
 
 -- procedure: insere preço passando valores de cnpj, tipo de combustivel, valor_novo
 call prc_verifica_preco('02086208000109', 5, 5.99);

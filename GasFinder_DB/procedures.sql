@@ -171,3 +171,23 @@ begin
 	end if;
 end $
 DELIMITER ;
+
+DELIMITER $
+create procedure if not exists getEvaluation(
+in placeID varchar(150),
+in userID int
+)
+begin
+	declare temp_id_tlp int;
+	select id_tlp into temp_id_tlp from tbl_localizacao_posto where place_ID = placeID;
+	if temp_id_tlp is not null then
+		if not exists (select 1 from tbl_usuario where id_usuario = userID) then
+			SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'o usuario referido não foi encontrado';
+		else
+			select * from tbl_avaliacao where fk_id_tlp = temp_id_tlp and fk_id_usuario = userID;
+		end if;
+	else
+		SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'o posto referido não foi encontrado';
+	end if;
+end $
+DELIMITER ;
