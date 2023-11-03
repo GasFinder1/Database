@@ -1,4 +1,4 @@
-create view dados_posto as
+create view if not exists dados_posto as
 select p.id_posto,	
 	p.cnpj,	
 	p.nome_posto,	
@@ -18,11 +18,11 @@ from  tbl_posto as p,
 	tbl_tipo_combustivel as tc, 
 	tbl_estado as e
 where p.id_posto = prc.fk_id_posto	
-	and prc.fk_id_tipo_combustivel = tc.id_combustivel	
+	and prc.fk_id_combustivel = tc.id_combustivel	
 	and p.uf = e.id_estado
 order by p.id_posto;
 
-create view localizacao_dados_posto as
+create view if not exists localizacao_dados_posto as
 select tlp.place_ID,	
 	p.id_posto,	
 	p.cnpj,	
@@ -45,6 +45,6 @@ from tbl_localizacao_posto as tlp,
 	tbl_estado as e
 where tlp.fk_id_posto = p.id_posto	
 	and p.id_posto = prc.fk_id_posto	
-	and prc.fk_id_tipo_combustivel = tc.id_combustivel	
+	and prc.fk_id_combustivel = tc.id_combustivel	
 	and p.uf = e.id_estado
 order by p.id_posto;

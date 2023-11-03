@@ -33,14 +33,16 @@ create table if not exists tbl_usuario (
 	id_usuario int primary key auto_increment,
 	nome_usuario varchar(100) not null,
 	email varchar(60) not null unique,
-	senha varchar(20) not null
+	senha varchar(20) not null,
+  dt_cad datetime default current_timestamp(),
+  dt_alt datetime default current_timestamp()
 );
 
 create table if not exists tbl_preco (
 	fk_id_posto int not null,
-	fk_id_tipo_combustivel int not null,
+	fk_id_combustivel int not null,
 	foreign key(fk_id_posto) references tbl_posto(id_posto),
-	foreign key(fk_id_tipo_combustivel) references tbl_tipo_combustivel(id_combustivel),
+	foreign key(fk_id_combustivel) references tbl_tipo_combustivel(id_combustivel),
 	valor float not null
 );
 
@@ -52,7 +54,8 @@ create table if not exists tbl_colaborativa (
 	fk_id_usuario int not null,
 	foreign key(fk_id_usuario) references tbl_usuario(id_usuario),
 	foreign key(fk_id_posto) references tbl_posto(id_posto),
-	foreign key(fk_id_combustivel) references tbl_tipo_combustivel(id_combustivel)
+	foreign key(fk_id_combustivel) references tbl_tipo_combustivel(id_combustivel),
+  unique key combustivel_posto_usuario (fk_id_combustivel, fk_id_posto, fk_id_usuario)
 );
 
 create table if not exists tbl_historico_preco (
@@ -65,7 +68,8 @@ create table if not exists tbl_historico_preco (
 );
 
 create table if not exists tbl_localizacao_posto (
-	place_ID varchar(150) not null primary key,
+	id_tlp int primary key auto_Increment,
+	place_ID varchar(150) not null unique,
 	media_ava_atendimento double,
 	media_ava_posto double,
 	media_ava_produto double,
@@ -76,9 +80,10 @@ create table if not exists tbl_localizacao_posto (
 create table if not exists tbl_favoritos (
 	id_favorito int primary key auto_increment,
 	fk_id_usuario int,
-	fk_place_ID varchar(150) not null,
-	foreign key(fk_place_ID) references tbl_localizacao_posto(place_ID),
-	foreign key(fk_id_usuario) references tbl_usuario(id_usuario)
+	fk_id_tlp int not null,
+	foreign key(fk_id_tlp) references tbl_localizacao_posto(id_tlp),
+	foreign key(fk_id_usuario) references tbl_usuario(id_usuario),
+  unique key unique_user_localizacao_posto (fk_id_usuario, fk_id_tlp)
 );
 
 create table if not exists tbl_avaliacao (
@@ -86,19 +91,21 @@ create table if not exists tbl_avaliacao (
 	qualidade_prod int,
 	qualidade_atendimento int,
 	dt_ava date not null,
-	fk_place_ID varchar(150) not null,
+	fk_id_tlp int not null,
 	fk_id_usuario int not null,
-	foreign key(fk_place_ID) references tbl_localizacao_posto(place_ID),
-	foreign key(fk_id_usuario) references tbl_usuario(id_usuario)
+	foreign key(fk_id_tlp) references tbl_localizacao_posto(id_tlp),
+	foreign key(fk_id_usuario) references tbl_usuario(id_usuario),
+  unique key unique_user_localizacao_posto (fk_id_usuario, fk_id_tlp)
 );
 
 create table if not exists tbl_comentario (
 	comentario varchar(500),
 	dt_comentario date,
-	fk_place_ID varchar(150) not null,
+	fk_id_tlp int not null,
 	fk_id_usuario int not null,
-	foreign key(fk_place_ID) references tbl_localizacao_posto(place_ID),
-	foreign key(fk_id_usuario) references tbl_usuario(id_usuario)
+	foreign key(fk_id_tlp) references tbl_localizacao_posto(id_tlp),
+	foreign key(fk_id_usuario) references tbl_usuario(id_usuario),
+  unique key unique_user_localizacao_posto (fk_id_usuario, fk_id_tlp)
 );
 
 create table if not exists tbl_parceiros (     
