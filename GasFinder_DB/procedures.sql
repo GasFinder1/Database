@@ -170,21 +170,3 @@ begin
 	end if;
 end $
 DELIMITER ;
-
-DELIMITER $
-create procedure user_insert(
-in user_name varchar(100),
-in user_email varchar(60),
-in user_password varchar(20)
-)
-begin
-	if exists (select 1 from tbl_usuario where email = user_email) then
-		SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'existe outro usuário cadastrado com esse email';
-	else
-		insert into tbl_usuario(nome_usuario, email, senha) values(user_name, user_email, user_password);
-        if (select ROW_COUNT()) = 0 then
-			SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Não foi possível inserir os dados';
-        end if;
-	end if;
-end $
-DELIMITER ;
