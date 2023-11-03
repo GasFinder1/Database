@@ -110,7 +110,7 @@ begin
 							SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Erro ao inserir os dados de avaliação';
 						end if;
 						set msg = 'avaliação inserida';
-                    end if;
+          end if;
 				end if;
 				select avg(coalesce(qualidade_prod, -1)) as m_pro,
 						avg(coalesce(qualidade_atendimento, -1)) as m_ate,
@@ -122,7 +122,6 @@ begin
 					media_ava_posto = m_pos,
 					media_ava_produto = m_pro
 				where place_ID = posto;
-				
 				if opiniao_usuario IS NOT NULL and opiniao_usuario != '' then
 					if exists (select 1 from tbl_comentario where fk_id_tlp = temp_id_tlp and fk_id_usuario = usuario and comentario <> opiniao_usuario) then
 						UPDATE tbl_comentario
@@ -156,6 +155,24 @@ DELIMITER ;
 
 DELIMITER $
 create procedure if not exists user_insert(
+in user_name varchar(100),
+in user_email varchar(60),
+in user_password varchar(20)
+)
+begin
+	if exists (select 1 from tbl_usuario where email = user_email) then
+		SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'existe outro usuário cadastrado com esse email';
+	else
+		insert into tbl_usuario(nome_usuario, email, senha) values(user_name, user_email, user_password);
+        if (select ROW_COUNT()) = 0 then
+			SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Não foi possível inserir os dados';
+        end if;
+	end if;
+end $
+DELIMITER ;
+
+DELIMITER $
+create procedure user_insert(
 in user_name varchar(100),
 in user_email varchar(60),
 in user_password varchar(20)
