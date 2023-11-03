@@ -15,18 +15,18 @@ begin
 	select id_combustivel into new_id_combustivel from tbl_tipo_combustivel
 	where id_combustivel = tipo_comb;
 	select valor into valor_atual from tbl_preco
-	where fk_id_posto = new_id_posto and fk_id_tipo_combustivel = new_id_combustivel;
+	where fk_id_posto = new_id_posto and fk_id_combustivel = new_id_combustivel;
 	select count(*) into contador from tbl_preco
-	where fk_id_posto = new_id_posto and fk_id_tipo_combustivel = new_id_combustivel;
+	where fk_id_posto = new_id_posto and fk_id_combustivel = new_id_combustivel;
 	if contador < 1 then
-			insert into tbl_preco(fk_id_posto, fk_id_tipo_combustivel, valor) 
+			insert into tbl_preco(fk_id_posto, fk_id_combustivel, valor) 
 			values (new_id_posto, new_id_combustivel, valor_novo);
 	else
 		if valor_atual <> valor_novo then
-			insert into tbl_historico_preco (fk_id_posto, fk_id_tipo_combustivel, ultimo_valor, dt_atualizacao ) 
+			insert into tbl_historico_preco (fk_id_posto, fk_id_combustivel, ultimo_valor, dt_atualizacao ) 
 			values (new_id_posto, new_id_combustivel, valor_atual, current_timestamp() );
 			update tbl_preco set valor = valor_novo
-			where fk_id_posto = new_id_posto and fk_id_tipo_combustivel = new_id_combustivel;
+			where fk_id_posto = new_id_posto and fk_id_combustivel = new_id_combustivel;
 		end if;
 	end if ;
 end $
