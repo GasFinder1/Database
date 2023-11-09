@@ -89,6 +89,7 @@ begin
 		if exists (select 1 from tbl_usuario where id_usuario = usuario) then
 			select id_tlp into temp_id_tlp from tbl_localizacao_posto where place_ID = posto;
 			if temp_id_tlp is not null then
+				-- corrigir apartir daqui
 				if exists (select 1 from tbl_avaliacao where fk_id_tlp = temp_id_tlp and fk_id_usuario = usuario and (av_posto <> avaliacao_posto OR qualidade_prod <> avaliacao_produto OR qualidade_atendimento <> avaliacao_atendimento)) then
 					UPDATE tbl_avaliacao
 					set av_posto = avaliacao_posto, 
@@ -117,21 +118,23 @@ begin
 						avg(coalesce(av_posto, -1)) as m_pos
 					into m_pro, m_ate, m_pos
 					from tbl_avaliacao;
-				UPDATE tbl_localizacao_posto
+				update tbl_localizacao_posto
 					set media_ava_atendimento = m_ate,
 					media_ava_posto = m_pos,
 					media_ava_produto = m_pro
 				where place_ID = posto;
 				
-				if opiniao_usuario IS NOT NULL and opiniao_usuario != '' then
-					if exists (select 1 from tbl_comentario where fk_id_tlp = temp_id_tlp and fk_id_usuario = usuario and comentario <> opiniao_usuario) then
-						UPDATE tbl_comentario
-						set comentario = opiniao_usuario, 
-						dt_comentario = CURDATE()
-						where fk_id_tlp = temp_id_tlp and fk_id_usuario = usuario;
-						if (select ROW_COUNT()) = 0 then
-							SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Erro ao atualizar o comentario';
-						end if;
+				if opiniao_usuario is not null and opiniao_usuario != '' then
+					if exists (select 1 from tbl_comentario where fk_id_tlp = temp_id_tlp and fk_id_usuario = usuario) then
+                        if exists (select 1 from tbl_comentario where fk_id_tlp = temp_id_tlp and fk_id_usuario = usuario and comentario <> opiniao_usuario) then
+                            update tbl_comentario
+                            set comentario = opiniao_usuario, 
+                            dt_comentario = CURDATE()
+                            where fk_id_tlp = temp_id_tlp and fk_id_usuario = usuario;
+                            if (select ROW_COUNT()) = 0 then
+                                SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Erro ao atualizar o comentario';
+                            end if;
+                        end if;
 					else
 						insert into tbl_comentario(comentario, dt_comentario, fk_id_tlp, fk_id_usuario)
 						values (opiniao_usuario, CURDATE(), temp_id_tlp, usuario);
@@ -150,6 +153,7 @@ begin
 		end if;
 	else
 		set msg = 'valores de avaliacao fora do escopo';
+		SIGNAL SQLSTATE '23000' set MESSAGE_TEXT = 'valores de avaliacao fora do escopo';
 	end if;
 end $
 DELIMITER ;

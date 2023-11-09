@@ -31,6 +31,10 @@ select * from tbl_preco;
 select * from tbl_historico_preco;
 select * from tbl_tipo_combustivel;
 
+call pr_avaliacao(1, 'ChIJ4TOHb2mrz5QRqMCRPyacgwk', 5, 5, 5, "gostei do posto", @msg);
+call getEvaluation('ChIJ4TOHb2mrz5QRqMCRPyacgwk', 1);
+
+
 select * from tbl_usuario;
 select * from tbl_localizacao_posto where place_ID = "ChIJ4TOHb2mrz5QRqMCRPyacgwk";
 select * from localizacao_dados_posto;
