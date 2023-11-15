@@ -26,6 +26,9 @@ create table if not exists tbl_posto (
 	bairro varchar(50) default "",
 	complemento varchar(125) default "",
 	uf int default 28,
+	data_insert date default curdate(),
+	data_update date default curdate(),
+	data_informacao date,
 	foreign key(uf) references tbl_estado(id_estado)
 );
 
