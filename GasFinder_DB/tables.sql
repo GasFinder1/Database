@@ -28,7 +28,6 @@ create table if not exists tbl_posto (
 	uf int default 28,
 	data_insert date default curdate(),
 	data_update date default curdate(),
-	data_informacao date,
 	foreign key(uf) references tbl_estado(id_estado)
 );
 
@@ -46,7 +45,8 @@ create table if not exists tbl_preco (
 	fk_id_tipo_combustivel int not null,
 	foreign key(fk_id_posto) references tbl_posto(id_posto),
 	foreign key(fk_id_tipo_combustivel) references tbl_tipo_combustivel(id_combustivel),
-	valor float not null
+	valor float not null,
+	data_informacao date
 );
 
 create table if not exists tbl_colaborativa (

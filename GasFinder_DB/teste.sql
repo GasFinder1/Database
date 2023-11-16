@@ -1,4 +1,5 @@
 select * from tbl_posto;
+select * from tbl_preco;
 select * from dados_posto where id_posto = 1;
 
 insert into tbl_posto(cnpj) values(0);
