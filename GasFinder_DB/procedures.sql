@@ -89,7 +89,6 @@ begin
 		if exists (select 1 from tbl_usuario where id_usuario = usuario) then
 			select id_tlp into temp_id_tlp from tbl_localizacao_posto where place_ID = posto;
 			if temp_id_tlp is not null then
-				-- corrigir apartir daqui
 				if exists (select 1 from tbl_avaliacao where fk_id_tlp = temp_id_tlp and fk_id_usuario = usuario and (av_posto <> avaliacao_posto OR qualidade_prod <> avaliacao_produto OR qualidade_atendimento <> avaliacao_atendimento)) then
 					UPDATE tbl_avaliacao
 					set av_posto = avaliacao_posto, 

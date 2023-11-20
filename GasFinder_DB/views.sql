@@ -49,6 +49,6 @@ from tbl_localizacao_posto as tlp,
 	tbl_estado as e
 where tlp.fk_id_posto = p.id_posto	
 	and p.id_posto = prc.fk_id_posto	
-	and prc.fk_id_tipo_combustivel = tc.id_combustivel	
+	and prc.fk_id_combustivel = tc.id_combustivel	
 	and p.uf = e.id_estado
 order by p.id_posto;
