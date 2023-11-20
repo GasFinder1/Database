@@ -73,6 +73,8 @@ create table if not exists tbl_historico_preco (
 create table if not exists tbl_localizacao_posto (
 	id_tlp int primary key auto_Increment,
 	place_ID varchar(150) not null unique,
+	latitude double not null default 0.0,
+	longitude double not null default 0.0,
 	media_ava_atendimento double,
 	media_ava_posto double,
 	media_ava_produto double,

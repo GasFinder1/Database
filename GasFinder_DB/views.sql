@@ -25,6 +25,8 @@ order by p.id_posto;
 
 create view if not exists localizacao_dados_posto as
 select tlp.place_ID,
+	tlp.latitude,
+	tlp.longitude,
 	p.id_posto,
 	p.cnpj,
 	p.nome_posto,

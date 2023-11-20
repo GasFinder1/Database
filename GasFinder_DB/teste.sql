@@ -12,6 +12,8 @@ call InserirPostoELocalizacao("ChIJ4TOHb2mrz5QRqMCRPyacgwk1", 0, @msg);
 select @msg;
 select * from tbl_localizacao_posto;
 select * from localizacao_dados_posto;
+SELECT * FROM localizacao_dados_posto WHERE (latitude BETWEEN -23.596331819704066 AND -23.686263980295937 OR latitude BETWEEN -23.686263980295937 AND -23.596331819704066) AND (longitude BETWEEN -46.78685635417169 AND -46.885027645828316 OR longitude BETWEEN -46.885027645828316 AND -46.78685635417169);
+select * from localizacao_dados_posto;
 
 -- procedure: avaliação de posto, produto e atendimento e comentário  */
 insert into tbl_usuario(nome_usuario, email, senha) values("teste", "teste@gmail.com", "123456789");
