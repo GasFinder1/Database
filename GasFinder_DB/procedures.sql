@@ -33,6 +33,42 @@ end $
 DELIMITER ;
 
 DELIMITER $
+create procedure prc_verifica_posto (
+ in new_cnpj varchar(14),
+ in new_nome_posto varchar (100),
+    in new_endereco varchar (50),
+    IN new_fantasia varchar (100),
+    in new_cep char (8),
+    in new_municipio varchar (50),
+    in new_bandeira varchar (50),
+    in new_numero varchar (6),
+    in new_bairro varchar (50),
+    in new_complemento varchar (15),
+    in new_uf char (2)
+    
+)
+begin
+ declare verifica_posto int;
+ 
+ select count(*) INTO verifica_posto
+    from tbl_posto
+    where cnpj = new_cnpj;
+    
+    if verifica_posto = 0 then
+  insert into tbl_posto (cnpj, nome_posto, endereco, fantasia, cep, municipio, bandeira, numero, bairro, complemento, uf)
+  values (new_cnpj, new_nome_posto, new_endereco, new_fantasia, new_cep, new_municipio, new_bandeira, new_numero, new_bairro, new_complemento, new_uf);
+    else
+  update tbl_posto
+    set nome_posto = new_nome_posto, endereco = new_endereco, fantasia = new_fantasia, cep = new_cep, municipio = new_municipio, bandeira = new_bandeira,
+  numero = new_numero, bairro = new_bairro, complemento = new_complemento, uf = new_uf
+        where cnpj = new_cnpj
+        And (nome_posto <> new_nome_posto or endereco <> new_endereco or fantasia <> new_fantasia or cep <> new_cep or municipio <> new_municipio or bandeira <> new_bandeira 
+  or numero <> new_numero or bairro <> new_bairro or complemento <> new_complemento or uf <> new_uf);
+    end if;
+end $
+DELIMITER ;
+
+DELIMITER $
 create procedure if not exists InserirPostoELocalizacao(
 	in placeID varchar(150),
 	in idPosto int,

@@ -34,3 +34,19 @@ select * from localizacao_dados_posto;
 SELECT * FROM localizacao_dados_posto WHERE place_ID = "ChIJ4TOHb2mrz5QRqMCRPyacgwk";
 select * from tbl_avaliacao;
 select * from tbl_avaliacao where fk_id_tlp = 1 and fk_id_usuario = 1 and (av_posto <> 5 OR qualidade_prod <> 5 OR qualidade_atendimento <> 5);
+
+-- procedure q	ue verifica os postos
+SET SQL_SAFE_UPDATES = 0; -- trocar para 1 depois de rodar
+call prc_verifica_posto (
+"61602199006587", 
+"COMPANHIA ULTRAGAZ S A", 
+"AVENIDA CAIRU", 
+"ULTRAGAZ", 
+"90230031", 
+"PORTO ALEGRE",
+"ULTRAGAZ", 
+"989", 
+"NAVEGANTES", 
+" ", 
+"21"
+);
