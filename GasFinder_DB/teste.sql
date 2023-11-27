@@ -22,10 +22,9 @@ insert into tbl_usuario(nome_usuario, email, senha) values("teste2", "teste2@gma
 -- call pr_avaliacao(fk_id_usuario, fk_place_ID, av_posto(0-5), av_produto(0-5), av_atendimento(0-5), opinião_texto, saida_texto);
 call pr_avaliacao(1, "ChIJ4TOHb2mrz5QRqMCRPyacgwk", 5, 5, 5, "", @msg);
 call pr_avaliacao(2, "ChIJ4TOHb2mrz5QRqMCRPyacgwk", 5, 5, 5, "gostei do posto", @msg);
-<<<<<<< HEAD
+
 call getEvaluation("ChIJ4TOHb2mrz5QRqMCRPyacgwk", 1);
-=======
->>>>>>> 1535c22a282a66be399b28ea21cce57dcd1327d9
+
 select * from tbl_avaliacao;
 select * from tbl_comentario;
 
@@ -37,20 +36,21 @@ select * from tbl_preco;
 select * from tbl_historico_preco;
 select * from tbl_tipo_combustivel;
 
-<<<<<<< HEAD
+
 call pr_avaliacao(1, 'ChIJ4TOHb2mrz5QRqMCRPyacgwk', 5, 5, 5, "gostei do posto", @msg);
 call getEvaluation('ChIJ4TOHb2mrz5QRqMCRPyacgwk', 1);
 
 
-=======
->>>>>>> 1535c22a282a66be399b28ea21cce57dcd1327d9
+
 select * from tbl_usuario;
 select * from tbl_localizacao_posto where place_ID = "ChIJ4TOHb2mrz5QRqMCRPyacgwk";
 select * from localizacao_dados_posto;
 SELECT * FROM localizacao_dados_posto WHERE place_ID = "ChIJ4TOHb2mrz5QRqMCRPyacgwk";
 select * from tbl_avaliacao;
-<<<<<<< HEAD
+
 select * from tbl_avaliacao where fk_id_tlp = 1 and fk_id_usuario = 1 and (av_posto <> 5 OR qualidade_prod <> 5 OR qualidade_atendimento <> 5);
-=======
+
 select * from tbl_avaliacao where fk_id_tlp = 1 and fk_id_usuario = 1 and (av_posto <> 5 OR qualidade_prod <> 5 OR qualidade_atendimento <> 5);
->>>>>>> 1535c22a282a66be399b28ea21cce57dcd1327d9
+
+select * from tbl_usuario;
+select * from tbl_colaborativa;

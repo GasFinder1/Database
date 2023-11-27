@@ -49,18 +49,6 @@ create table if not exists tbl_preco (
 	data_informacao date
 );
 
-create table if not exists tbl_colaborativa (
-	valor_inserido float not null,
-	dt_atualização date not null,
-	fk_id_combustivel int not null,
-	fk_id_posto int not null,
-	fk_id_usuario int not null,
-	foreign key(fk_id_usuario) references tbl_usuario(id_usuario),
-	foreign key(fk_id_posto) references tbl_posto(id_posto),
-	foreign key(fk_id_combustivel) references tbl_tipo_combustivel(id_combustivel),
-    unique key combustivel_posto_usuario (fk_id_combustivel, fk_id_posto, fk_id_usuario)
-);
-
 create table if not exists tbl_historico_preco (
 	fk_id_posto int not null,
 	fk_id_combustivel int not null,
@@ -80,6 +68,18 @@ create table if not exists tbl_localizacao_posto (
 	media_ava_produto double,
 	fk_id_posto int,
 	foreign key(fk_id_posto) references tbl_posto(id_posto)
+);
+
+create table if not exists tbl_colaborativa (
+	valor_inserido float not null,
+	dt_atualização date not null default curdate(),
+	fk_id_combustivel int not null,
+	fk_id_tlp int not null,
+	fk_id_usuario int not null,
+	foreign key(fk_id_usuario) references tbl_usuario(id_usuario),
+	foreign key(fk_id_tlp) references tbl_localizacao_posto(id_tlp),
+	foreign key(fk_id_combustivel) references tbl_tipo_combustivel(id_combustivel),
+    unique key combustivel_posto_usuario (fk_id_combustivel, fk_id_tlp, fk_id_usuario)
 );
 
 create table if not exists tbl_favoritos (
@@ -127,4 +127,20 @@ create table if not exists tbl_parceiros (
 	complemento  varchar (125),
 	uf int not null,
 	foreign key(uf) references tbl_estado(id_estado)
+);
+
+create table if not exists tbl_Place_IDs(
+	place_id varchar(150) primary key,
+	latitude double not null,
+	longitude double not null,
+	nome_posto varchar(100) not null,
+	endereco varchar(100) not null,
+	bairro varchar(100) not null,
+	municipio varchar(100) not null,
+    estado varchar(50) not null
+);
+
+create table if not exists tbl_postos_removidos(
+	fk_id_posto int unique,
+	foreign key(fk_id_posto) references tbl_posto(id_posto)
 );
