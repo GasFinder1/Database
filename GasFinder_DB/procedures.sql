@@ -1,3 +1,4 @@
+drop procedure if exists prc_verifica_preco;
 DELIMITER $
 create procedure if not exists prc_verifica_preco (
 	in new_cnpj varchar(14),
@@ -32,6 +33,7 @@ begin
 end $
 DELIMITER ;
 
+drop procedure if exists InserirPostoELocalizacao;
 DELIMITER $
 create procedure if not exists InserirPostoELocalizacao(
 	in placeID varchar(150),
@@ -64,6 +66,7 @@ begin
 end $
 DELIMITER ;
 
+drop procedure if exists pr_avaliacao;
 DELIMITER $
 create procedure if not exists pr_avaliacao(
 	in usuario int,
@@ -157,11 +160,12 @@ begin
 end $
 DELIMITER ;
 
+drop procedure if exists user_insert;
 DELIMITER $
 create procedure if not exists user_insert(
 in user_name varchar(100),
 in user_email varchar(60),
-in user_password varchar(20)
+in user_password varchar(100)
 )
 begin
 	if exists (select 1 from tbl_usuario where email = user_email) then
@@ -175,6 +179,7 @@ begin
 end $
 DELIMITER ;
 
+drop procedure if exists getEvaluation;
 DELIMITER $
 create procedure if not exists getEvaluation(
 in placeID varchar(150),
