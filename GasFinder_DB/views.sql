@@ -56,6 +56,7 @@ order by p.id_posto;
 create view if not exists get_favorites as
 select 
 	f.id_favorito,
+    f.fk_id_usuario,
 	tlp.place_ID,
 	tlp.latitude,
 	tlp.longitude,
