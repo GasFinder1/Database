@@ -1,3 +1,4 @@
+drop procedure if exists prc_verifica_preco;
 DELIMITER $
 create procedure if not exists prc_verifica_preco (
 	in new_cnpj varchar(14),
@@ -15,23 +16,24 @@ begin
 	select id_combustivel into new_id_combustivel from tbl_tipo_combustivel
 	where id_combustivel = tipo_comb;
 	select valor into valor_atual from tbl_preco
-	where fk_id_posto = new_id_posto and fk_id_combustivel = new_id_combustivel;
+	where fk_id_posto = new_id_posto and fk_id_tipo_combustivel = new_id_combustivel;
 	select count(*) into contador from tbl_preco
-	where fk_id_posto = new_id_posto and fk_id_combustivel = new_id_combustivel;
+	where fk_id_posto = new_id_posto and fk_id_tipo_combustivel = new_id_combustivel;
 	if contador < 1 then
-			insert into tbl_preco(fk_id_posto, fk_id_combustivel, valor) 
+			insert into tbl_preco(fk_id_posto, fk_id_tipo_combustivel, valor) 
 			values (new_id_posto, new_id_combustivel, valor_novo);
 	else
 		if valor_atual <> valor_novo then
-			insert into tbl_historico_preco (fk_id_posto, fk_id_combustivel, ultimo_valor, dt_atualizacao ) 
+			insert into tbl_historico_preco (fk_id_posto, fk_id_tipo_combustivel, ultimo_valor, dt_atualizacao ) 
 			values (new_id_posto, new_id_combustivel, valor_atual, current_timestamp() );
 			update tbl_preco set valor = valor_novo
-			where fk_id_posto = new_id_posto and fk_id_combustivel = new_id_combustivel;
+			where fk_id_posto = new_id_posto and fk_id_tipo_combustivel = new_id_combustivel;
 		end if;
 	end if ;
 end $
 DELIMITER ;
 
+drop procedure if exists InserirPostoELocalizacao;
 DELIMITER $
 create procedure if not exists InserirPostoELocalizacao(
 	in placeID varchar(150),
@@ -64,6 +66,7 @@ begin
 end $
 DELIMITER ;
 
+drop procedure if exists pr_avaliacao;
 DELIMITER $
 create procedure if not exists pr_avaliacao(
 	in usuario int,
@@ -110,27 +113,30 @@ begin
 							SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Erro ao inserir os dados de avaliação';
 						end if;
 						set msg = 'avaliação inserida';
-          end if;
+                    end if;
 				end if;
 				select avg(coalesce(qualidade_prod, -1)) as m_pro,
 						avg(coalesce(qualidade_atendimento, -1)) as m_ate,
 						avg(coalesce(av_posto, -1)) as m_pos
 					into m_pro, m_ate, m_pos
 					from tbl_avaliacao;
-				UPDATE tbl_localizacao_posto
+				update tbl_localizacao_posto
 					set media_ava_atendimento = m_ate,
 					media_ava_posto = m_pos,
 					media_ava_produto = m_pro
 				where place_ID = posto;
-				if opiniao_usuario IS NOT NULL and opiniao_usuario != '' then
-					if exists (select 1 from tbl_comentario where fk_id_tlp = temp_id_tlp and fk_id_usuario = usuario and comentario <> opiniao_usuario) then
-						UPDATE tbl_comentario
-						set comentario = opiniao_usuario, 
-						dt_comentario = CURDATE()
-						where fk_id_tlp = temp_id_tlp and fk_id_usuario = usuario;
-						if (select ROW_COUNT()) = 0 then
-							SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Erro ao atualizar o comentario';
-						end if;
+				
+				if opiniao_usuario is not null and opiniao_usuario != '' then
+					if exists (select 1 from tbl_comentario where fk_id_tlp = temp_id_tlp and fk_id_usuario = usuario) then
+                        if exists (select 1 from tbl_comentario where fk_id_tlp = temp_id_tlp and fk_id_usuario = usuario and comentario <> opiniao_usuario) then
+                            update tbl_comentario
+                            set comentario = opiniao_usuario, 
+                            dt_comentario = CURDATE()
+                            where fk_id_tlp = temp_id_tlp and fk_id_usuario = usuario;
+                            if (select ROW_COUNT()) = 0 then
+                                SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Erro ao atualizar o comentario';
+                            end if;
+                        end if;
 					else
 						insert into tbl_comentario(comentario, dt_comentario, fk_id_tlp, fk_id_usuario)
 						values (opiniao_usuario, CURDATE(), temp_id_tlp, usuario);
@@ -149,15 +155,17 @@ begin
 		end if;
 	else
 		set msg = 'valores de avaliacao fora do escopo';
+		SIGNAL SQLSTATE '23000' set MESSAGE_TEXT = 'valores de avaliacao fora do escopo';
 	end if;
 end $
 DELIMITER ;
 
+drop procedure if exists user_insert;
 DELIMITER $
 create procedure if not exists user_insert(
 in user_name varchar(100),
 in user_email varchar(60),
-in user_password varchar(20)
+in user_password varchar(100)
 )
 begin
 	if exists (select 1 from tbl_usuario where email = user_email) then
@@ -167,6 +175,27 @@ begin
         if (select ROW_COUNT()) = 0 then
 			SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'Não foi possível inserir os dados';
         end if;
+	end if;
+end $
+DELIMITER ;
+
+drop procedure if exists getEvaluation;
+DELIMITER $
+create procedure if not exists getEvaluation(
+in placeID varchar(150),
+in userID int
+)
+begin
+	declare temp_id_tlp int;
+	select id_tlp into temp_id_tlp from tbl_localizacao_posto where place_ID = placeID;
+	if temp_id_tlp is not null then
+		if not exists (select 1 from tbl_usuario where id_usuario = userID) then
+			SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'o usuario referido não foi encontrado';
+		else
+			select * from tbl_avaliacao where fk_id_tlp = temp_id_tlp and fk_id_usuario = userID;
+		end if;
+	else
+		SIGNAL SQLSTATE '45000' set MESSAGE_TEXT = 'o posto referido não foi encontrado';
 	end if;
 end $
 DELIMITER ;
